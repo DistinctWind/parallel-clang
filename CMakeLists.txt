@@ -5,17 +5,19 @@ set(CMAKE_CXX_STANDARD 17)
 
 include(cmake/llvm.cmake)
 find_package(LLVM REQUIRED CONFIG)
-message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 
-add_definitions(${LLVM_DEFINITIONS})
+message(STATUS "Using LLVM ${LLVM_PACKAGE_VERSION}")
+
 include_directories(${LLVM_INCLUDE_DIRS})
 link_directories(${LLVM_LIBRARY_DIRS})
+add_definitions(${LLVM_DEFINITIONS})
 
 list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
 include(AddLLVM)
 
 find_package(Clang REQUIRED CONFIG)
 include_directories(${CLANG_INCLUDE_DIRS})
+#list(APPEND CMAKE_MODULE_PATH "${CLANG_CMAKE_DIR}")
 
 # Handle RTTI stuff, which often leads to error
 if(NOT ${LLVM_ENABLE_RTTI})
@@ -32,9 +34,4 @@ if(NOT ${LLVM_ENABLE_RTTI})
   # compilers
 endif()
 
-set(_SOURCE_FILES ParallelClangPlugin.cpp)
-
-add_llvm_component_library(ParallelClangPlugin
-    MODULE ${_SOURCE_FILES}
-    PLUGIN_TOOL clang
-)
+add_subdirectory(src)
