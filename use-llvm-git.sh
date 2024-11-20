@@ -1,0 +1,1 @@
+export PATH=$(pwd)/build/llvm-install/bin:$PATH
