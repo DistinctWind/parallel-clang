@@ -3,10 +3,8 @@ project(ParallelClangPlugin VERSION 0.1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
-include(cmake/llvm.cmake)
 find_package(LLVM REQUIRED CONFIG)
-
-message(STATUS "Using LLVM ${LLVM_PACKAGE_VERSION}")
+message(STATUS "Using LLVM ${LLVM_PACKAGE_VERSION} in ${LLVM_CONFIG}")
 
 include_directories(${LLVM_INCLUDE_DIRS})
 link_directories(${LLVM_LIBRARY_DIRS})
@@ -14,10 +12,6 @@ add_definitions(${LLVM_DEFINITIONS})
 
 list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
 include(AddLLVM)
-
-find_package(Clang REQUIRED CONFIG)
-include_directories(${CLANG_INCLUDE_DIRS})
-#list(APPEND CMAKE_MODULE_PATH "${CLANG_CMAKE_DIR}")
 
 # Handle RTTI stuff, which often leads to error
 if(NOT ${LLVM_ENABLE_RTTI})

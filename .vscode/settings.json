@@ -1,1 +1,5 @@
-{}
+{
+    "cmake.configureSettings": {
+        "LLVM_DIR": "/home/yaozhiqi/.local/llvm-git/lib/cmake/llvm"
+    }
+}
