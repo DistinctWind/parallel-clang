@@ -21,6 +21,14 @@ struct ParallelAttrInfo : public ParsedAttrInfo {
     Spellings = spellings;
   }
 
+  bool diagAppertainsToDecl(Sema &S, const ParsedAttr &Attr,
+                            const Decl *D) const override {
+    S.Diag(Attr.getLoc(), diag::err_attribute_wrong_decl_type_str)
+        << Attr << Attr.isRegularKeywordAttribute()
+        << "for-range(C++11) loop statements";
+    return false;
+  }
+
   bool diagAppertainsToStmt(Sema &S, const ParsedAttr &Attr,
                             const Stmt *St) const override {
     if (!isa<CXXForRangeStmt>(St)) {
@@ -28,7 +36,7 @@ struct ParallelAttrInfo : public ParsedAttrInfo {
           << Attr << Attr.isRegularKeywordAttribute()
           << "for-range(C++11) loop statements";
       static auto id =
-          S.Diags.getCustomDiagID(DiagnosticsEngine::Note, "not %0");
+          S.Diags.getCustomDiagID(DiagnosticsEngine::Note, "not '%0'");
       S.Diag(St->getBeginLoc(), id) << St->getStmtClassName();
       return false;
     }
