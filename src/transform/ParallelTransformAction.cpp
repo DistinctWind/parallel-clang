@@ -17,10 +17,10 @@ using namespace clang;
 using namespace ast_matchers;
 
 static StatementMatcher buildForRangeMatcher() {
-  return cxxForRangeStmt(hasBody(compoundStmt().bind("body")),
-                         hasLoopVariable(varDecl().bind("var")),
-                         hasRangeInit(expr().bind("range")))
-      .bind("for");
+  // return cxxForRangeStmt(hasBody(compoundStmt().bind("body")),
+  //                        hasLoopVariable(varDecl().bind("var")),
+  //                        hasRangeInit(expr().bind("range")))
+  return cxxForRangeStmt().bind("for");
 }
 
 namespace {
