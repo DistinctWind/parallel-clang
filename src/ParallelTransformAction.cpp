@@ -21,11 +21,12 @@ extern const ast_matchers::internal::VariadicDynCastAllOfMatcher<Stmt,
                                                                  AttributedStmt>
     attributedStmt;
 
-static StatementMatcher buildForRangeMatcher() {
-  // return cxxForRangeStmt(hasBody(compoundStmt().bind("body")),
-  //                        hasLoopVariable(varDecl().bind("var")),
-  //                        hasRangeInit(expr().bind("range")))
-  return attributedStmt(hasParallelAttribute(cxxForRangeStmt())).bind("for");
+static StatementMatcher buildForRangeControlFlowMatcher() {
+  return attributedStmt(hasParallelAttribute(
+      cxxForRangeStmt(hasBody(compoundStmt().bind("body")),
+                      hasLoopVariable(varDecl().bind("var")),
+                      hasRangeInit(expr().bind("range")))
+          .bind("for")));
 }
 
 namespace {
@@ -37,10 +38,10 @@ struct MatchForRangeCallBack : public MatchFinder::MatchCallback {
     const auto &Nodes = Result.Nodes;
     auto &Diag = Result.Context->getDiagnostics();
 
-    const auto *forSt = Nodes.getNodeAs<AttributedStmt>("for");
-    // const auto *body = Nodes.getNodeAs<CompoundStmt>("body");
-    // const auto *var = Nodes.getNodeAs<VarDecl>("var");
-    // const auto *range = Nodes.getNodeAs<Expr>("range");
+    const auto *forSt = Nodes.getNodeAs<CXXForRangeStmt>("for");
+    const auto *body = Nodes.getNodeAs<CompoundStmt>("body");
+    const auto *var = Nodes.getNodeAs<VarDecl>("var");
+    const auto *range = Nodes.getNodeAs<Expr>("range");
 
     Diag.Report(forSt->getBeginLoc(), diag_warn_for_range);
   }
@@ -59,9 +60,9 @@ ParallelTransformAction::CreateASTConsumer(CompilerInstance &CI,
 
   ASTFinder = std::make_unique<MatchFinder>();
   ForRangeMatchCB = std::make_unique<MatchForRangeCallBack>(DiagWarnForRange);
-  ASTFinder->addMatcher(
-      traverse(TK_IgnoreUnlessSpelledInSource, buildForRangeMatcher()),
-      ForRangeMatchCB.get());
+  ASTFinder->addMatcher(traverse(TK_IgnoreUnlessSpelledInSource,
+                                 buildForRangeControlFlowMatcher()),
+                        ForRangeMatchCB.get());
 
   return std::move(ASTFinder->newASTConsumer());
 }
