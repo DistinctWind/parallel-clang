@@ -30,8 +30,16 @@ private:
 namespace {
 using namespace clang;
 AST_MATCHER(AttributedStmt, hasParallelAttribute) {
-  return Node.getAttrs().size() > 0 &&
-         strcmp(Node.getAttrs()[0]->getSpelling(), "parallel") == 0;
+  for (const auto *attr : Node.getAttrs()) {
+    if (!isa<AnnotateAttr>(attr))
+      continue;
+    const auto *annotateAttr = cast<AnnotateAttr>(attr);
+    if (annotateAttr->getAnnotation() == "parallel") {
+      // llvm::errs() << "Found parallel attribute\n";
+      return true;
+    }
+  }
+  return false;
 }
 } // namespace
 #endif
