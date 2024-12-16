@@ -4,7 +4,6 @@
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "clang/ASTMatchers/ASTMatchersMacros.h"
 #include "clang/Frontend/FrontendAction.h"
-#include "llvm/Support/raw_ostream.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -26,8 +25,15 @@ struct ParallelTransformAction : public PluginASTAction {
 private:
   std::unique_ptr<ast_matchers::MatchFinder> ASTFinder;
   std::unique_ptr<ast_matchers::MatchFinder::MatchCallback> ForRangeMatchCB;
-  std::unique_ptr<ast_matchers::MatchFinder::MatchCallback>
-      ForRangeControlFlowMatchCB;
+  std::unique_ptr<ast_matchers::MatchFinder::MatchCallback> BreakMatchCB;
+  std::unique_ptr<ast_matchers::MatchFinder::MatchCallback> ContinueMatchCB;
+  std::unique_ptr<ast_matchers::MatchFinder::MatchCallback> ReturnMatchCB;
+
+  void createDiagID(DiagnosticsEngine &Diag);
+  unsigned int DiagWarnForRangeParallel;
+  unsigned int DiagErrorUnexpectedBreakStmt;
+  unsigned int DiagErrorUnexpectedContinueStmt;
+  unsigned int DiagErrorUnexpectedReturnStmt;
 };
 } // end namespace clang
 

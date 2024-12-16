@@ -1,7 +1,6 @@
 #include "ParallelTransformAction.h"
 
 #include "clang/AST/ASTTypeTraits.h"
-#include "clang/AST/AttrIterator.h"
 #include "clang/AST/Decl.h"
 #include "clang/AST/Expr.h"
 #include "clang/AST/Stmt.h"
@@ -11,7 +10,6 @@
 #include "clang/Basic/Diagnostic.h"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/FrontendPluginRegistry.h"
-#include "llvm/Support/raw_ostream.h"
 #include <cassert>
 #include <memory>
 
@@ -30,7 +28,7 @@ static StatementMatcher buildForRangeMatcher() {
           .bind("for")));
 }
 
-static StatementMatcher buildForRangeControlFlowMatcher() {
+static StatementMatcher buildForRangeBreakMatcher() {
   return attributedStmt(hasParallelAttribute(
       cxxForRangeStmt(
           hasBody(compoundStmt(forEachDescendant(breakStmt().bind("break")))
@@ -58,22 +56,35 @@ struct MatchForRangeCallBack : public MatchFinder::MatchCallback {
   }
 };
 
-struct MatchForRangeControlFlowCallBack : public MatchFinder::MatchCallback {
-  unsigned int diag_error_unexpected_control_flow;
-  MatchForRangeControlFlowCallBack(unsigned int DiagErrorUnexpectedControlFlow)
-      : diag_error_unexpected_control_flow(DiagErrorUnexpectedControlFlow) {}
+struct MatchForRangeBreakCallBack : public MatchFinder::MatchCallback {
+  unsigned int DiagErrorUnexpectedBreakStmt;
+  MatchForRangeBreakCallBack(unsigned int DiagErrorUnexpectedBreakStmt)
+      : DiagErrorUnexpectedBreakStmt(DiagErrorUnexpectedBreakStmt) {}
   void run(const MatchFinder::MatchResult &Result) override {
     const auto &Nodes = Result.Nodes;
     auto &Diag = Result.Context->getDiagnostics();
-
     const auto *breakSt = Nodes.getNodeAs<BreakStmt>("break");
     if (breakSt) {
-      llvm::errs() << "Found break statement\n";
-      Diag.Report(breakSt->getBreakLoc(), diag_error_unexpected_control_flow);
-    } 
+      Diag.Report(breakSt->getBreakLoc(), DiagErrorUnexpectedBreakStmt);
+    }
   }
 };
 } // namespace
+
+void ParallelTransformAction::createDiagID(DiagnosticsEngine &Diag) {
+  DiagWarnForRangeParallel = Diag.getCustomDiagID(
+      DiagnosticsEngine::Warning,
+      "this for-range will be converted to parallel version");
+  DiagErrorUnexpectedBreakStmt = Diag.getCustomDiagID(
+      DiagnosticsEngine::Error,
+      "unexpected control flow statement 'break' found in parallel for-range");
+  DiagErrorUnexpectedContinueStmt = Diag.getCustomDiagID(
+      DiagnosticsEngine::Error, "unexpected control flow statement 'continue' "
+                                "found in parallel for-range");
+  DiagErrorUnexpectedReturnStmt = Diag.getCustomDiagID(
+      DiagnosticsEngine::Error, "unexpected control flow statement 'return' "
+                                "found in parallel for-range");
+}
 
 std::unique_ptr<ASTConsumer>
 ParallelTransformAction::CreateASTConsumer(CompilerInstance &CI,
@@ -81,24 +92,19 @@ ParallelTransformAction::CreateASTConsumer(CompilerInstance &CI,
   assert(CI.hasASTContext() && "No ASTContext??");
 
   auto &Diag = CI.getASTContext().getDiagnostics();
-  auto DiagWarnForRange = Diag.getCustomDiagID(
-      DiagnosticsEngine::Warning,
-      "this for-range will be converted to parallel version");
-  auto DiagErrorUnexpectedControlFlow = Diag.getCustomDiagID(
-      DiagnosticsEngine::Error,
-      "unexpected control flow statement found in parallel for-range");
+  createDiagID(Diag);
 
   ASTFinder = std::make_unique<MatchFinder>();
-  ForRangeMatchCB = std::make_unique<MatchForRangeCallBack>(DiagWarnForRange);
-  ForRangeControlFlowMatchCB =
-      std::make_unique<MatchForRangeControlFlowCallBack>(
-          DiagErrorUnexpectedControlFlow);
+  ForRangeMatchCB =
+      std::make_unique<MatchForRangeCallBack>(DiagWarnForRangeParallel);
+  BreakMatchCB = std::make_unique<MatchForRangeBreakCallBack>(
+      DiagErrorUnexpectedBreakStmt);
   ASTFinder->addMatcher(
       traverse(TK_IgnoreUnlessSpelledInSource, buildForRangeMatcher()),
       ForRangeMatchCB.get());
-  ASTFinder->addMatcher(traverse(TK_IgnoreUnlessSpelledInSource,
-                                 buildForRangeControlFlowMatcher()),
-                        ForRangeControlFlowMatchCB.get());
+  ASTFinder->addMatcher(
+      traverse(TK_IgnoreUnlessSpelledInSource, buildForRangeBreakMatcher()),
+      BreakMatchCB.get());
 
   return std::move(ASTFinder->newASTConsumer());
 }
