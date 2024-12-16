@@ -11,6 +11,7 @@
 #include "clang/Basic/Diagnostic.h"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/FrontendPluginRegistry.h"
+#include "llvm/Support/raw_ostream.h"
 #include <cassert>
 #include <memory>
 
@@ -21,11 +22,21 @@ extern const ast_matchers::internal::VariadicDynCastAllOfMatcher<Stmt,
                                                                  AttributedStmt>
     attributedStmt;
 
-static StatementMatcher buildForRangeControlFlowMatcher() {
+static StatementMatcher buildForRangeMatcher() {
   return attributedStmt(hasParallelAttribute(
       cxxForRangeStmt(hasBody(compoundStmt().bind("body")),
                       hasLoopVariable(varDecl().bind("var")),
                       hasRangeInit(expr().bind("range")))
+          .bind("for")));
+}
+
+static StatementMatcher buildForRangeControlFlowMatcher() {
+  return attributedStmt(hasParallelAttribute(
+      cxxForRangeStmt(
+          hasBody(compoundStmt(forEachDescendant(breakStmt().bind("break")))
+                      .bind("body")),
+          hasLoopVariable(varDecl().bind("var")),
+          hasRangeInit(expr().bind("range")))
           .bind("for")));
 }
 
@@ -46,6 +57,22 @@ struct MatchForRangeCallBack : public MatchFinder::MatchCallback {
     Diag.Report(forSt->getBeginLoc(), diag_warn_for_range);
   }
 };
+
+struct MatchForRangeControlFlowCallBack : public MatchFinder::MatchCallback {
+  unsigned int diag_error_unexpected_control_flow;
+  MatchForRangeControlFlowCallBack(unsigned int DiagErrorUnexpectedControlFlow)
+      : diag_error_unexpected_control_flow(DiagErrorUnexpectedControlFlow) {}
+  void run(const MatchFinder::MatchResult &Result) override {
+    const auto &Nodes = Result.Nodes;
+    auto &Diag = Result.Context->getDiagnostics();
+
+    const auto *breakSt = Nodes.getNodeAs<BreakStmt>("break");
+    if (breakSt) {
+      llvm::errs() << "Found break statement\n";
+      Diag.Report(breakSt->getBreakLoc(), diag_error_unexpected_control_flow);
+    } 
+  }
+};
 } // namespace
 
 std::unique_ptr<ASTConsumer>
@@ -57,12 +84,21 @@ ParallelTransformAction::CreateASTConsumer(CompilerInstance &CI,
   auto DiagWarnForRange = Diag.getCustomDiagID(
       DiagnosticsEngine::Warning,
       "this for-range will be converted to parallel version");
+  auto DiagErrorUnexpectedControlFlow = Diag.getCustomDiagID(
+      DiagnosticsEngine::Error,
+      "unexpected control flow statement found in parallel for-range");
 
   ASTFinder = std::make_unique<MatchFinder>();
   ForRangeMatchCB = std::make_unique<MatchForRangeCallBack>(DiagWarnForRange);
+  ForRangeControlFlowMatchCB =
+      std::make_unique<MatchForRangeControlFlowCallBack>(
+          DiagErrorUnexpectedControlFlow);
+  ASTFinder->addMatcher(
+      traverse(TK_IgnoreUnlessSpelledInSource, buildForRangeMatcher()),
+      ForRangeMatchCB.get());
   ASTFinder->addMatcher(traverse(TK_IgnoreUnlessSpelledInSource,
                                  buildForRangeControlFlowMatcher()),
-                        ForRangeMatchCB.get());
+                        ForRangeControlFlowMatchCB.get());
 
   return std::move(ASTFinder->newASTConsumer());
 }

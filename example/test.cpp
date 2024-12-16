@@ -10,6 +10,8 @@ void test() {
   [[parallel]]
   for (auto &i : arr) {
     i = i * 2;
+    break;
+    continue;
   }
   for (auto &i : arr) {
     i = i * 2;

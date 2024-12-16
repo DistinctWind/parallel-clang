@@ -5,6 +5,7 @@
 #include "clang/ASTMatchers/ASTMatchersMacros.h"
 #include "clang/Frontend/FrontendAction.h"
 #include "llvm/Support/raw_ostream.h"
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -25,6 +26,8 @@ struct ParallelTransformAction : public PluginASTAction {
 private:
   std::unique_ptr<ast_matchers::MatchFinder> ASTFinder;
   std::unique_ptr<ast_matchers::MatchFinder::MatchCallback> ForRangeMatchCB;
+  std::unique_ptr<ast_matchers::MatchFinder::MatchCallback>
+      ForRangeControlFlowMatchCB;
 };
 } // end namespace clang
 
