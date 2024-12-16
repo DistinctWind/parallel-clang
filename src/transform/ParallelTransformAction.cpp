@@ -16,11 +16,14 @@
 using namespace clang;
 using namespace ast_matchers;
 
+extern const internal::VariadicDynCastAllOfMatcher<Stmt, AttributedStmt>
+    attributedStmt;
+
 static StatementMatcher buildForRangeMatcher() {
   // return cxxForRangeStmt(hasBody(compoundStmt().bind("body")),
   //                        hasLoopVariable(varDecl().bind("var")),
   //                        hasRangeInit(expr().bind("range")))
-  return cxxForRangeStmt().bind("for");
+  return attributedStmt().bind("for");
 }
 
 namespace {
@@ -32,10 +35,10 @@ struct MatchForRangeCallBack : public MatchFinder::MatchCallback {
     const auto &Nodes = Result.Nodes;
     auto &Diag = Result.Context->getDiagnostics();
 
-    const auto *forSt = Nodes.getNodeAs<CXXForRangeStmt>("for");
-    const auto *body = Nodes.getNodeAs<CompoundStmt>("body");
-    const auto *var = Nodes.getNodeAs<VarDecl>("var");
-    const auto *range = Nodes.getNodeAs<Expr>("range");
+    const auto *forSt = Nodes.getNodeAs<AttributedStmt>("for");
+    // const auto *body = Nodes.getNodeAs<CompoundStmt>("body");
+    // const auto *var = Nodes.getNodeAs<VarDecl>("var");
+    // const auto *range = Nodes.getNodeAs<Expr>("range");
 
     Diag.Report(forSt->getBeginLoc(), diag_warn_for_range);
   }
