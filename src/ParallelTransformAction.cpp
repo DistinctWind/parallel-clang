@@ -1,6 +1,7 @@
 #include "ParallelTransformAction.h"
 
 #include "clang/AST/ASTTypeTraits.h"
+#include "clang/AST/AttrIterator.h"
 #include "clang/AST/Decl.h"
 #include "clang/AST/Expr.h"
 #include "clang/AST/Stmt.h"
@@ -16,14 +17,15 @@
 using namespace clang;
 using namespace ast_matchers;
 
-extern const internal::VariadicDynCastAllOfMatcher<Stmt, AttributedStmt>
+extern const ast_matchers::internal::VariadicDynCastAllOfMatcher<Stmt,
+                                                                 AttributedStmt>
     attributedStmt;
 
 static StatementMatcher buildForRangeMatcher() {
   // return cxxForRangeStmt(hasBody(compoundStmt().bind("body")),
   //                        hasLoopVariable(varDecl().bind("var")),
   //                        hasRangeInit(expr().bind("range")))
-  return attributedStmt().bind("for");
+  return attributedStmt(hasParallelAttribute()).bind("for");
 }
 
 namespace {
