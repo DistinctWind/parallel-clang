@@ -4,6 +4,7 @@
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "clang/ASTMatchers/ASTMatchersMacros.h"
 #include "clang/Frontend/FrontendAction.h"
+#include "llvm/Support/raw_ostream.h"
 #include <string>
 #include <vector>
 
@@ -29,14 +30,16 @@ private:
 
 namespace {
 using namespace clang;
-AST_MATCHER(AttributedStmt, hasParallelAttribute) {
+AST_MATCHER_P(AttributedStmt, hasParallelAttribute,
+              ast_matchers::internal::Matcher<Stmt>, InnerMatcher) {
   for (const auto *attr : Node.getAttrs()) {
     if (!isa<AnnotateAttr>(attr))
       continue;
     const auto *annotateAttr = cast<AnnotateAttr>(attr);
     if (annotateAttr->getAnnotation() == "parallel") {
       // llvm::errs() << "Found parallel attribute\n";
-      return true;
+      // Node.getSubStmt()->dump();
+      return InnerMatcher.matches(*Node.getSubStmt(), Finder, Builder);
     }
   }
   return false;

@@ -25,7 +25,7 @@ static StatementMatcher buildForRangeMatcher() {
   // return cxxForRangeStmt(hasBody(compoundStmt().bind("body")),
   //                        hasLoopVariable(varDecl().bind("var")),
   //                        hasRangeInit(expr().bind("range")))
-  return attributedStmt(hasParallelAttribute()).bind("for");
+  return attributedStmt(hasParallelAttribute(cxxForRangeStmt())).bind("for");
 }
 
 namespace {
