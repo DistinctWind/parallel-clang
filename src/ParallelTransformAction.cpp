@@ -16,7 +16,7 @@
 using namespace clang;
 using namespace ast_matchers;
 
-extern const ast_matchers::internal::VariadicDynCastAllOfMatcher<Stmt,
+const ast_matchers::internal::VariadicDynCastAllOfMatcher<Stmt,
                                                                  AttributedStmt>
     attributedStmt;
 
