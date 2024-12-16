@@ -18,6 +18,6 @@ void test() {
     i = i * 2;
     break;
     continue;
-    break
+    break;
   }
 }
