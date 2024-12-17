@@ -10,6 +10,7 @@
 #include "clang/Basic/Diagnostic.h"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/FrontendPluginRegistry.h"
+#include "clang/Rewrite/Core/Rewriter.h"
 #include <cassert>
 #include <memory>
 
@@ -70,8 +71,10 @@ static StatementMatcher buildForRangeGotoMatcher() {
 namespace {
 struct MatchForRangeCallBack : public MatchFinder::MatchCallback {
   unsigned int diag_warn_for_range;
-  MatchForRangeCallBack(unsigned int DiagWarnForRange)
-      : diag_warn_for_range(DiagWarnForRange) {}
+  MatchForRangeCallBack(unsigned int DiagWarnForRange,
+                        Rewriter &RewriteForRangeWriter)
+      : diag_warn_for_range(DiagWarnForRange),
+        RewriteForRangeWriter(RewriteForRangeWriter) {}
   void run(const MatchFinder::MatchResult &Result) override {
     const auto &Nodes = Result.Nodes;
     auto &Diag = Result.Context->getDiagnostics();
@@ -83,6 +86,15 @@ struct MatchForRangeCallBack : public MatchFinder::MatchCallback {
 
     Diag.Report(forSt->getBeginLoc(), diag_warn_for_range);
   }
+
+  void onEndOfTranslationUnit() override {
+    RewriteForRangeWriter
+        .getEditBuffer(RewriteForRangeWriter.getSourceMgr().getMainFileID())
+        .write(llvm::outs());
+  }
+
+private:
+  Rewriter RewriteForRangeWriter;
 };
 
 struct MatchForRangeBreakCallBack : public MatchFinder::MatchCallback {
@@ -165,13 +177,14 @@ std::unique_ptr<ASTConsumer>
 ParallelTransformAction::CreateASTConsumer(CompilerInstance &CI,
                                            StringRef InFile) {
   assert(CI.hasASTContext() && "No ASTContext??");
+  RewriteForRangeWriter.setSourceMgr(CI.getSourceManager(), CI.getLangOpts());
 
   auto &Diag = CI.getASTContext().getDiagnostics();
   createDiagID(Diag);
 
   ASTFinder = std::make_unique<MatchFinder>();
-  ForRangeMatchCB =
-      std::make_unique<MatchForRangeCallBack>(DiagWarnForRangeParallel);
+  ForRangeMatchCB = std::make_unique<MatchForRangeCallBack>(
+      DiagWarnForRangeParallel, RewriteForRangeWriter);
   BreakMatchCB = std::make_unique<MatchForRangeBreakCallBack>(
       DiagErrorUnexpectedBreakStmt);
   ContinueMatchCB = std::make_unique<MatchForRangeContinueCallBack>(

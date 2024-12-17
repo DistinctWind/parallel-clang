@@ -4,6 +4,7 @@
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "clang/ASTMatchers/ASTMatchersMacros.h"
 #include "clang/Frontend/FrontendAction.h"
+#include "clang/Rewrite/Core/Rewriter.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -36,6 +37,8 @@ private:
   unsigned int DiagErrorUnexpectedContinueStmt;
   unsigned int DiagErrorUnexpectedReturnStmt;
   unsigned int DiagErrorUnexpectedGotoStmt;
+
+  Rewriter RewriteForRangeWriter;
 };
 } // end namespace clang
 
