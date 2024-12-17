@@ -13,11 +13,13 @@ void test() {
     break;
     continue;
     break;
+    return;
   }
   for (auto &i : arr) {
     i = i * 2;
     break;
     continue;
     break;
+    return;
   }
 }
