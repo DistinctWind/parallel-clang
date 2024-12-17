@@ -15,7 +15,7 @@ lab:
     continue;
     break;
     return;
-    goto lab;
+    { goto lab; }
   }
   for (auto &i : arr) {
     i = i * 2;
@@ -23,6 +23,6 @@ lab:
     continue;
     break;
     return;
-    goto lab;
+    { goto lab; }
   }
 }
