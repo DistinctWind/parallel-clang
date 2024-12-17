@@ -164,7 +164,7 @@ struct MatchForRangeGotoCallBack : public MatchFinder::MatchCallback {
 
 void ParallelTransformAction::createDiagID(DiagnosticsEngine &Diag) {
   DiagWarnForRangeParallel = Diag.getCustomDiagID(
-      DiagnosticsEngine::Warning,
+      DiagnosticsEngine::Note,
       "this for-range will be converted to parallel version");
   DiagErrorUnexpectedBreakStmt = Diag.getCustomDiagID(
       DiagnosticsEngine::Error,
