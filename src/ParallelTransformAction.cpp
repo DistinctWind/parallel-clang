@@ -11,6 +11,7 @@
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/FrontendPluginRegistry.h"
 #include "clang/Rewrite/Core/Rewriter.h"
+#include "llvm/Support/raw_ostream.h"
 #include <cassert>
 #include <memory>
 
@@ -84,10 +85,15 @@ struct MatchForRangeCallBack : public MatchFinder::MatchCallback {
     const auto *var = Nodes.getNodeAs<VarDecl>("var");
     const auto *range = Nodes.getNodeAs<Expr>("range");
 
+    hasErrorOccurred = Diag.hasErrorOccurred();
+    if (hasErrorOccurred)
+      return;
     Diag.Report(forSt->getBeginLoc(), diag_warn_for_range);
   }
 
   void onEndOfTranslationUnit() override {
+    if (hasErrorOccurred)
+      return;
     RewriteForRangeWriter
         .getEditBuffer(RewriteForRangeWriter.getSourceMgr().getMainFileID())
         .write(llvm::outs());
@@ -95,6 +101,7 @@ struct MatchForRangeCallBack : public MatchFinder::MatchCallback {
 
 private:
   Rewriter RewriteForRangeWriter;
+  bool hasErrorOccurred = false;
 };
 
 struct MatchForRangeBreakCallBack : public MatchFinder::MatchCallback {
@@ -194,9 +201,6 @@ ParallelTransformAction::CreateASTConsumer(CompilerInstance &CI,
   GotoMatchCB =
       std::make_unique<MatchForRangeGotoCallBack>(DiagErrorUnexpectedGotoStmt);
   ASTFinder->addMatcher(
-      traverse(TK_IgnoreUnlessSpelledInSource, buildForRangeMatcher()),
-      ForRangeMatchCB.get());
-  ASTFinder->addMatcher(
       traverse(TK_IgnoreUnlessSpelledInSource, buildForRangeBreakMatcher()),
       BreakMatchCB.get());
   ASTFinder->addMatcher(
@@ -208,6 +212,9 @@ ParallelTransformAction::CreateASTConsumer(CompilerInstance &CI,
   ASTFinder->addMatcher(
       traverse(TK_IgnoreUnlessSpelledInSource, buildForRangeGotoMatcher()),
       GotoMatchCB.get());
+  ASTFinder->addMatcher(
+      traverse(TK_IgnoreUnlessSpelledInSource, buildForRangeMatcher()),
+      ForRangeMatchCB.get());
 
   return std::move(ASTFinder->newASTConsumer());
 }
