@@ -57,6 +57,16 @@ static StatementMatcher buildForRangeReturnMatcher() {
           .bind("for")));
 }
 
+static StatementMatcher buildForRangeGotoMatcher() {
+  return attributedStmt(hasParallelAttribute(
+      cxxForRangeStmt(
+          hasBody(compoundStmt(forEachDescendant(gotoStmt().bind("goto")))
+                      .bind("body")),
+          hasLoopVariable(varDecl().bind("var")),
+          hasRangeInit(expr().bind("range")))
+          .bind("for")));
+}
+
 namespace {
 struct MatchForRangeCallBack : public MatchFinder::MatchCallback {
   unsigned int diag_warn_for_range;
@@ -117,6 +127,20 @@ struct MatchForRangeReturnCallBack : public MatchFinder::MatchCallback {
     }
   }
 };
+
+struct MatchForRangeGotoCallBack : public MatchFinder::MatchCallback {
+  unsigned int DiagErrorUnexpectedGotoStmt;
+  MatchForRangeGotoCallBack(unsigned int DiagErrorUnexpectedGotoStmt)
+      : DiagErrorUnexpectedGotoStmt(DiagErrorUnexpectedGotoStmt) {}
+  void run(const MatchFinder::MatchResult &Result) override {
+    const auto &Nodes = Result.Nodes;
+    auto &Diag = Result.Context->getDiagnostics();
+    const auto *gotoSt = Nodes.getNodeAs<GotoStmt>("goto");
+    if (gotoSt) {
+      Diag.Report(gotoSt->getGotoLoc(), DiagErrorUnexpectedGotoStmt);
+    }
+  }
+};
 } // namespace
 
 void ParallelTransformAction::createDiagID(DiagnosticsEngine &Diag) {
@@ -131,6 +155,9 @@ void ParallelTransformAction::createDiagID(DiagnosticsEngine &Diag) {
                                 "found in parallel for-range");
   DiagErrorUnexpectedReturnStmt = Diag.getCustomDiagID(
       DiagnosticsEngine::Error, "unexpected control flow statement 'return' "
+                                "found in parallel for-range");
+  DiagErrorUnexpectedGotoStmt = Diag.getCustomDiagID(
+      DiagnosticsEngine::Error, "unexpected control flow statement 'goto' "
                                 "found in parallel for-range");
 }
 
@@ -151,6 +178,8 @@ ParallelTransformAction::CreateASTConsumer(CompilerInstance &CI,
       DiagErrorUnexpectedContinueStmt);
   ReturnMatchCB = std::make_unique<MatchForRangeReturnCallBack>(
       DiagErrorUnexpectedReturnStmt);
+  GotoMatchCB =
+      std::make_unique<MatchForRangeGotoCallBack>(DiagErrorUnexpectedGotoStmt);
   ASTFinder->addMatcher(
       traverse(TK_IgnoreUnlessSpelledInSource, buildForRangeMatcher()),
       ForRangeMatchCB.get());
@@ -163,6 +192,9 @@ ParallelTransformAction::CreateASTConsumer(CompilerInstance &CI,
   ASTFinder->addMatcher(
       traverse(TK_IgnoreUnlessSpelledInSource, buildForRangeReturnMatcher()),
       ReturnMatchCB.get());
+  ASTFinder->addMatcher(
+      traverse(TK_IgnoreUnlessSpelledInSource, buildForRangeGotoMatcher()),
+      GotoMatchCB.get());
 
   return std::move(ASTFinder->newASTConsumer());
 }

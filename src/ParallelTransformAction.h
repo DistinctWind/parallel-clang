@@ -28,12 +28,14 @@ private:
   std::unique_ptr<ast_matchers::MatchFinder::MatchCallback> BreakMatchCB;
   std::unique_ptr<ast_matchers::MatchFinder::MatchCallback> ContinueMatchCB;
   std::unique_ptr<ast_matchers::MatchFinder::MatchCallback> ReturnMatchCB;
+  std::unique_ptr<ast_matchers::MatchFinder::MatchCallback> GotoMatchCB;
 
   void createDiagID(DiagnosticsEngine &Diag);
   unsigned int DiagWarnForRangeParallel;
   unsigned int DiagErrorUnexpectedBreakStmt;
   unsigned int DiagErrorUnexpectedContinueStmt;
   unsigned int DiagErrorUnexpectedReturnStmt;
+  unsigned int DiagErrorUnexpectedGotoStmt;
 };
 } // end namespace clang
 
