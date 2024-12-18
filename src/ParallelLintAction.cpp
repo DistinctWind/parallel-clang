@@ -95,14 +95,6 @@ struct MatchForRangeCallBack : public MatchFinder::MatchCallback {
     Diag.Report(forSt->getBeginLoc(), diag_warn_for_range);
   }
 
-  void onEndOfTranslationUnit() override {
-    if (hasErrorOccurred)
-      return;
-    RewriteForRangeWriter
-        .getEditBuffer(RewriteForRangeWriter.getSourceMgr().getMainFileID())
-        .write(llvm::outs());
-  }
-
 private:
   Rewriter RewriteForRangeWriter;
   bool hasErrorOccurred = false;
