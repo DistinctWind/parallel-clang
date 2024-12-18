@@ -10,7 +10,7 @@
 #include <vector>
 
 namespace clang {
-struct ParallelTransformAction : public PluginASTAction {
+struct ParallelLintAction : public PluginASTAction {
   std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI,
                                                  StringRef InFile) override;
 

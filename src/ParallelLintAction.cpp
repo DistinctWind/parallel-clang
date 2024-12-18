@@ -1,4 +1,4 @@
-#include "ParallelTransformAction.h"
+#include "ParallelLintAction.h"
 
 #include "clang/AST/ASTTypeTraits.h"
 #include "clang/AST/Decl.h"
@@ -166,7 +166,7 @@ struct MatchForRangeGotoCallBack : public MatchFinder::MatchCallback {
 };
 } // namespace
 
-void ParallelTransformAction::createDiagID(DiagnosticsEngine &Diag) {
+void ParallelLintAction::createDiagID(DiagnosticsEngine &Diag) {
   DiagWarnForRangeParallel = Diag.getCustomDiagID(
       DiagnosticsEngine::Note,
       "this for-range will be converted to parallel version");
@@ -185,8 +185,7 @@ void ParallelTransformAction::createDiagID(DiagnosticsEngine &Diag) {
 }
 
 std::unique_ptr<ASTConsumer>
-ParallelTransformAction::CreateASTConsumer(CompilerInstance &CI,
-                                           StringRef InFile) {
+ParallelLintAction::CreateASTConsumer(CompilerInstance &CI, StringRef InFile) {
   assert(CI.hasASTContext() && "No ASTContext??");
   RewriteForRangeWriter.setSourceMgr(CI.getSourceManager(), CI.getLangOpts());
 
@@ -223,6 +222,5 @@ ParallelTransformAction::CreateASTConsumer(CompilerInstance &CI,
   return std::move(ASTFinder->newASTConsumer());
 }
 
-static FrontendPluginRegistry::Add<ParallelTransformAction>
-    Y("parallel_transform",
-      "transform annotated for-range loop into std algorithm parallel version");
+static FrontendPluginRegistry::Add<ParallelLintAction>
+    Y("parallel_lint", "lint for annotated parallel for-range loop");
