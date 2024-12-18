@@ -4,7 +4,9 @@ project(ParallelClangPlugin VERSION 0.1.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 
 find_package(LLVM REQUIRED CONFIG)
+find_package(Clang REQUIRED CONFIG)
 message(STATUS "Using LLVM ${LLVM_PACKAGE_VERSION} in ${LLVM_CONFIG}")
+message(STATUS "Using Clang in ${Clang_CONFIG}")
 
 include_directories(${LLVM_INCLUDE_DIRS})
 link_directories(${LLVM_LIBRARY_DIRS})
