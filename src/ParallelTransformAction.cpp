@@ -13,6 +13,7 @@
 #include "clang/Rewrite/Core/Rewriter.h"
 #include "llvm/Support/raw_ostream.h"
 #include <cassert>
+#include <cstring>
 #include <memory>
 
 using namespace clang;
@@ -22,11 +23,13 @@ const ast_matchers::internal::VariadicDynCastAllOfMatcher<Stmt, AttributedStmt>
     attributedStmt;
 
 static StatementMatcher buildForRangeMatcher() {
-  return attributedStmt(hasParallelAttribute(
-      cxxForRangeStmt(hasBody(compoundStmt().bind("body")),
-                      hasLoopVariable(varDecl().bind("var")),
-                      hasRangeInit(expr().bind("range")))
-          .bind("for")));
+  return attributedStmt(
+             hasParallelAttribute(
+                 cxxForRangeStmt(hasBody(compoundStmt().bind("body")),
+                                 hasLoopVariable(varDecl().bind("var")),
+                                 hasRangeInit(expr().bind("range")))
+                     .bind("for")))
+      .bind("attr");
 }
 
 static StatementMatcher buildForRangeBreakMatcher() {
@@ -80,6 +83,7 @@ struct MatchForRangeCallBack : public MatchFinder::MatchCallback {
     const auto &Nodes = Result.Nodes;
     auto &Diag = Result.Context->getDiagnostics();
 
+    const auto *attr = Nodes.getNodeAs<AttributedStmt>("attr");
     const auto *forSt = Nodes.getNodeAs<CXXForRangeStmt>("for");
     const auto *body = Nodes.getNodeAs<CompoundStmt>("body");
     const auto *var = Nodes.getNodeAs<VarDecl>("var");
