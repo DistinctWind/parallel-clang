@@ -30,4 +30,9 @@ if(NOT ${LLVM_ENABLE_RTTI})
   # compilers
 endif()
 
+find_package(GTest REQUIRED)
+include_directories(${GTEST_INCLUDE_DIRS})
+enable_testing()
+
 add_subdirectory(src)
+add_subdirectory(transformer_test)
