@@ -35,4 +35,5 @@ include_directories(${GTEST_INCLUDE_DIRS})
 enable_testing()
 
 add_subdirectory(src)
+add_subdirectory(transformer)
 add_subdirectory(transformer_test)

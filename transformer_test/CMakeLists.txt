@@ -1,14 +1,3 @@
-add_executable(parallel-transformer
-  ParallelAttribute.cpp
-  ParallelTransformer.cpp
-)
-
-target_link_libraries(parallel-transformer
-  PRIVATE
-  clangTooling
-  clangTransformer
-)
-
 add_executable(parallel-transformer-test
   ParallelAttribute.cpp
   ParallelTransformerTest.cpp
