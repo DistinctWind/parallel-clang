@@ -141,5 +141,6 @@ TEST(Transformer, FunctionNameTransform) {
       "clang-tool", std::make_shared<PCHContainerOperations>()));
   auto Result =
       applyAtomicChanges("input.cc", Input, Changes, ApplyChangesSpec());
-  llvm::errs() << *Result;
+  if (Result)
+    llvm::errs() << *Result;
 }

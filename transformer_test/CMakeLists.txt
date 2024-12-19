@@ -14,6 +14,7 @@ target_link_libraries(parallel-transformer
   clangStaticAnalyzerFrontend
   clangTooling
   clangToolingSyntax
+  clangTransformer
   GTest::gtest_main
 )
 
