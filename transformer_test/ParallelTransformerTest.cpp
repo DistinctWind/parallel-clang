@@ -63,10 +63,13 @@ void test() {
     bool matched = false;
     void run(const MatchFinder::MatchResult &Result) override {
       const auto *stmt = Result.Nodes.getNodeAs<CXXForRangeStmt>("stmt");
+      const auto *var = Result.Nodes.getNodeAs<VarDecl>("var");
+      var->print(llvm::errs(), 0, true);
       matched = true;
     }
   } CallBack;
-  auto matcher = cxxForRangeStmt().bind("stmt");
+  auto matcher =
+      cxxForRangeStmt(hasLoopVariable(varDecl().bind("var"))).bind("stmt");
   MatchFinder Finder;
   Finder.addMatcher(matcher, &CallBack);
 
