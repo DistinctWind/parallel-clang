@@ -5,15 +5,7 @@ add_executable(parallel-transformer
 
 target_link_libraries(parallel-transformer
   PRIVATE
-  clangAST
-  clangBasic
-  clangDriver
-  clangFrontend
-  clangRewriteFrontend
-  clangSerialization
-  clangStaticAnalyzerFrontend
   clangTooling
-  clangToolingSyntax
   clangTransformer
   GTest::gtest_main
 )
