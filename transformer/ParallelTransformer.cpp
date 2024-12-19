@@ -109,6 +109,7 @@ int main(int argc, const char **argv) {
   auto Rule = makeRule(
       buildMatcher(),
       {addInclude("algorithm", IncludeFormat::Angled),
+       addInclude("execution", IncludeFormat::Angled),
        changeTo(cat("std::for_each(std::execution::par, ", "std::begin(",
                     node("range"), "), ", "std::end(", node("range"), "), ",
                     "[&](", node("var"), ")", node("body"), ");"))});
