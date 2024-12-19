@@ -40,8 +40,10 @@ using namespace ast_matchers;
 using transformer::addInclude;
 using transformer::cat;
 using transformer::changeTo;
+using transformer::encloseNodes;
 using transformer::IncludeFormat;
 using transformer::makeRule;
+using transformer::name;
 using transformer::node;
 
 const ast_matchers::internal::VariadicDynCastAllOfMatcher<Stmt, AttributedStmt>
@@ -106,13 +108,23 @@ int main(int argc, const char **argv) {
     }
   };
 
+  auto varWithoutColon =
+      [](const ast_matchers::MatchFinder::MatchResult &result)
+      -> Expected<CharSourceRange> {
+    auto range = node("var")(result);
+    if (!range)
+      return range.takeError();
+    range->setEnd(range->getEnd().getLocWithOffset(-1));
+    return range;
+  };
+
   auto Rule = makeRule(
       buildMatcher(),
       {addInclude("algorithm", IncludeFormat::Angled),
        addInclude("execution", IncludeFormat::Angled),
        changeTo(cat("std::for_each(std::execution::par, ", "std::begin(",
                     node("range"), "), ", "std::end(", node("range"), "), ",
-                    "[&](", node("var"), ")", node("body"), ");"))});
+                    "[&](", varWithoutColon, ")", node("body"), ");"))});
   Transformer Transformer(std::move(Rule), std::move(Consumer));
   MatchFinder Finder;
   Transformer.registerMatchers(&Finder);
