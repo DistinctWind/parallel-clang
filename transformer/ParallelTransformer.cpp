@@ -1,7 +1,6 @@
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "clang/ASTMatchers/ASTMatchers.h"
 #include "clang/Basic/ParsedAttrInfo.h"
-#include "clang/Frontend/FrontendActions.h"
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Refactoring/AtomicChange.h"
 #include "clang/Tooling/Tooling.h"
@@ -40,10 +39,8 @@ using namespace ast_matchers;
 using transformer::addInclude;
 using transformer::cat;
 using transformer::changeTo;
-using transformer::encloseNodes;
 using transformer::IncludeFormat;
 using transformer::makeRule;
-using transformer::name;
 using transformer::node;
 
 const ast_matchers::internal::VariadicDynCastAllOfMatcher<Stmt, AttributedStmt>
