@@ -1,7 +1,6 @@
 set(_SOURCE_FILES 
 ParallelAttribute.cpp 
 ParallelLintAction.cpp
-ParallelTransformAction.cpp
 )
 
 add_llvm_component_library(ParallelClangPlugin
