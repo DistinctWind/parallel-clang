@@ -86,8 +86,6 @@ struct MatchForRangeCallBack : public MatchFinder::MatchCallback {
     const auto *range = Nodes.getNodeAs<Expr>("range");
 
     hasErrorOccurred = Diag.hasErrorOccurred();
-    if (hasErrorOccurred)
-      return;
     Diag.Report(forSt->getBeginLoc(), diag_warn_for_range);
   }
 
@@ -156,7 +154,7 @@ struct MatchForRangeGotoCallBack : public MatchFinder::MatchCallback {
 
 void ParallelLintAction::createDiagID(DiagnosticsEngine &Diag) {
   DiagWarnForRangeParallel = Diag.getCustomDiagID(
-      DiagnosticsEngine::Note,
+      DiagnosticsEngine::Warning,
       "this for-range will be converted to parallel version");
   DiagErrorUnexpectedBreakStmt = Diag.getCustomDiagID(
       DiagnosticsEngine::Error,
@@ -192,6 +190,9 @@ ParallelLintAction::CreateASTConsumer(CompilerInstance &CI, StringRef InFile) {
   GotoMatchCB =
       std::make_unique<MatchForRangeGotoCallBack>(DiagErrorUnexpectedGotoStmt);
   ASTFinder->addMatcher(
+      traverse(TK_IgnoreUnlessSpelledInSource, buildForRangeMatcher()),
+      ForRangeMatchCB.get());
+  ASTFinder->addMatcher(
       traverse(TK_IgnoreUnlessSpelledInSource, buildForRangeBreakMatcher()),
       BreakMatchCB.get());
   ASTFinder->addMatcher(
@@ -203,9 +204,6 @@ ParallelLintAction::CreateASTConsumer(CompilerInstance &CI, StringRef InFile) {
   ASTFinder->addMatcher(
       traverse(TK_IgnoreUnlessSpelledInSource, buildForRangeGotoMatcher()),
       GotoMatchCB.get());
-  ASTFinder->addMatcher(
-      traverse(TK_IgnoreUnlessSpelledInSource, buildForRangeMatcher()),
-      ForRangeMatchCB.get());
 
   return std::move(ASTFinder->newASTConsumer());
 }
