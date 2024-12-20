@@ -7,6 +7,7 @@ target_link_libraries(parallel-transformer-test
   clangTooling
   clangTransformer
   ParallelAttribute
+  ParallelASTMatcher
   GTest::gtest_main
 )
 

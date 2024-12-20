@@ -1,6 +1,7 @@
+#include "attributedStmtMatcher.h"
+
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "clang/ASTMatchers/ASTMatchers.h"
-#include "clang/Basic/ParsedAttrInfo.h"
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Refactoring/AtomicChange.h"
 #include "clang/Tooling/Tooling.h"
@@ -12,25 +13,6 @@
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/Error.h"
 #include "llvm/Support/raw_ostream.h"
-#include <memory>
-
-namespace {
-using namespace clang;
-AST_MATCHER_P(AttributedStmt, hasParallelAttribute,
-              ast_matchers::internal::Matcher<Stmt>, InnerMatcher) {
-  for (const auto *attr : Node.getAttrs()) {
-    if (!isa<AnnotateAttr>(attr))
-      continue;
-    const auto *annotateAttr = cast<AnnotateAttr>(attr);
-    if (annotateAttr->getAnnotation() == "parallel") {
-      // llvm::errs() << "Found parallel attribute\n";
-      // Node.getSubStmt()->dump();
-      return InnerMatcher.matches(*Node.getSubStmt(), Finder, Builder);
-    }
-  }
-  return false;
-}
-} // namespace
 
 using namespace llvm;
 using namespace clang;
@@ -42,9 +24,6 @@ using transformer::changeTo;
 using transformer::IncludeFormat;
 using transformer::makeRule;
 using transformer::node;
-
-const ast_matchers::internal::VariadicDynCastAllOfMatcher<Stmt, AttributedStmt>
-    attributedStmt;
 
 static cl::OptionCategory
     ParallelTransformCategory("parallel-transform options");

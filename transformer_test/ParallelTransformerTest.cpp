@@ -1,6 +1,7 @@
+#include "attributedStmtMatcher.h"
+
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "clang/ASTMatchers/ASTMatchers.h"
-#include "clang/Basic/ParsedAttrInfo.h"
 #include "clang/Frontend/FrontendActions.h"
 #include "clang/Tooling/Refactoring/AtomicChange.h"
 #include "clang/Tooling/Tooling.h"
@@ -14,30 +15,9 @@
 #include "gtest/gtest.h"
 #include <memory>
 
-namespace {
-using namespace clang;
-AST_MATCHER_P(AttributedStmt, hasParallelAttribute,
-              ast_matchers::internal::Matcher<Stmt>, InnerMatcher) {
-  for (const auto *attr : Node.getAttrs()) {
-    if (!isa<AnnotateAttr>(attr))
-      continue;
-    const auto *annotateAttr = cast<AnnotateAttr>(attr);
-    if (annotateAttr->getAnnotation() == "parallel") {
-      // llvm::errs() << "Found parallel attribute\n";
-      // Node.getSubStmt()->dump();
-      return InnerMatcher.matches(*Node.getSubStmt(), Finder, Builder);
-    }
-  }
-  return false;
-}
-} // namespace
-
 using namespace clang;
 using namespace tooling;
 using namespace ast_matchers;
-
-const ast_matchers::internal::VariadicDynCastAllOfMatcher<Stmt, AttributedStmt>
-    attributedStmt;
 
 TEST(Simple, Equal) { ASSERT_EQ(1 + 1, 2); }
 

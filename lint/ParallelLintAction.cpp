@@ -18,9 +18,6 @@
 using namespace clang;
 using namespace ast_matchers;
 
-const ast_matchers::internal::VariadicDynCastAllOfMatcher<Stmt, AttributedStmt>
-    attributedStmt;
-
 static StatementMatcher buildForRangeMatcher() {
   return attributedStmt(
              hasParallelAttribute(

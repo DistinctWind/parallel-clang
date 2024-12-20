@@ -1,0 +1,4 @@
+add_library(ParallelASTMatcher INTERFACE)
+
+target_include_directories(ParallelASTMatcher INTERFACE .)
+target_sources(ParallelASTMatcher INTERFACE attributedStmtMatcher.cpp)

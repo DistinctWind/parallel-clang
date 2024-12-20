@@ -1,8 +1,7 @@
 #ifndef TERNARY_CONVERTER_H
 #define TERNARY_CONVERTER_H
-#include "clang/AST/Stmt.h"
+#include "attributedStmtMatcher.h"
 #include "clang/ASTMatchers/ASTMatchFinder.h"
-#include "clang/ASTMatchers/ASTMatchersMacros.h"
 #include "clang/Frontend/FrontendAction.h"
 #include "clang/Rewrite/Core/Rewriter.h"
 #include <memory>
@@ -42,21 +41,4 @@ private:
 };
 } // end namespace clang
 
-namespace {
-using namespace clang;
-AST_MATCHER_P(AttributedStmt, hasParallelAttribute,
-              ast_matchers::internal::Matcher<Stmt>, InnerMatcher) {
-  for (const auto *attr : Node.getAttrs()) {
-    if (!isa<AnnotateAttr>(attr))
-      continue;
-    const auto *annotateAttr = cast<AnnotateAttr>(attr);
-    if (annotateAttr->getAnnotation() == "parallel") {
-      // llvm::errs() << "Found parallel attribute\n";
-      // Node.getSubStmt()->dump();
-      return InnerMatcher.matches(*Node.getSubStmt(), Finder, Builder);
-    }
-  }
-  return false;
-}
-} // namespace
 #endif

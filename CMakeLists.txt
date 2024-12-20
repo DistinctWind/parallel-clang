@@ -35,6 +35,7 @@ include_directories(${GTEST_INCLUDE_DIRS})
 enable_testing()
 
 add_subdirectory(attribute)
+add_subdirectory(ast_matcher)
 add_subdirectory(lint)
 add_subdirectory(transformer)
 add_subdirectory(transformer_test)

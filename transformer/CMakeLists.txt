@@ -7,4 +7,5 @@ target_link_libraries(parallel-transformer
   clangTooling
   clangTransformer
   ParallelAttribute
+  ParallelASTMatcher
 )

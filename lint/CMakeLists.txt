@@ -9,4 +9,5 @@ add_llvm_component_library(ParallelLintPlugin
 
 target_link_libraries(ParallelLintPlugin PRIVATE
     ParallelAttribute
+    ParallelASTMatcher
 )
