@@ -57,7 +57,7 @@ bool applySourceChanges(const AtomicChanges &Changes) {
       llvm::errs() << toString(Result.takeError());
       return true;
     }
-    llvm::errs() << *Result;
+    llvm::outs() << *Result;
   }
   return false;
 }
