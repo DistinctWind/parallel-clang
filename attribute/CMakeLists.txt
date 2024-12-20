@@ -1,9 +1,5 @@
-add_library(parallel-attribute
-  ParallelAttribute.cpp
-)
+add_library(ParallelAttribute INTERFACE)
 
-target_link_libraries(parallel-attribute
-  PRIVATE
-  clangTooling
-  clangTransformer
+target_sources(ParallelAttribute INTERFACE 
+  ParallelAttribute.cpp
 )

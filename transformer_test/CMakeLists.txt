@@ -1,5 +1,4 @@
 add_executable(parallel-transformer-test
-  ParallelAttribute.cpp
   ParallelTransformerTest.cpp
 )
 
@@ -7,6 +6,7 @@ target_link_libraries(parallel-transformer-test
   PRIVATE
   clangTooling
   clangTransformer
+  ParallelAttribute
   GTest::gtest_main
 )
 
