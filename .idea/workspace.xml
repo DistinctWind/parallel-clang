@@ -40,9 +40,9 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e7a97e04-0b89-4a02-b207-9cc7eba724cc" name="更改" comment="">
-      <change beforePath="$PROJECT_DIR$/example/normal.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/test.cpp" beforeDir="false" />
+    <list default="true" id="e7a97e04-0b89-4a02-b207-9cc7eba724cc" name="更改" comment="重构了测试文件并加入.idea文件夹">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/test_wrong_usage.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/example/test_wrong_usage.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -100,8 +100,8 @@
       <window_info id="Commit_Guest" show_stripe_button="false" />
       <window_info id="Pull Requests" />
       <window_info id="Learn" />
-      <window_info content_ui="combo" id="Project" order="0" weight="0.14030463" />
-      <window_info active="true" id="Commit" order="1" visible="true" weight="0.14030463" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.14030463" />
+      <window_info id="Commit" order="1" weight="0.14030463" />
       <window_info id="Structure" order="2" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Database Changes" />
       <window_info anchor="bottom" id="TypeScript" />
@@ -114,8 +114,8 @@
       <window_info anchor="bottom" id="Version Control" order="0" />
       <window_info anchor="bottom" id="Problems" order="1" />
       <window_info anchor="bottom" id="Problems View" order="2" weight="0.31499514" />
-      <window_info anchor="bottom" id="Terminal" order="3" />
-      <window_info active="true" anchor="bottom" id="Services" order="4" visible="true" weight="0.31499514" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="3" visible="true" weight="0.31499514" />
+      <window_info anchor="bottom" id="Services" order="4" weight="0.31499514" />
       <window_info anchor="bottom" id="CMake" order="5" weight="0.31499514" />
       <window_info anchor="bottom" id="Messages" order="6" weight="0.31460136" />
       <window_info active="true" anchor="bottom" id="Run" order="7" visible="true" weight="0.31460136" />
@@ -238,8 +238,17 @@
       <workItem from="1734680482253" duration="364000" />
       <workItem from="1734777850787" duration="462000" />
       <workItem from="1734778333198" duration="545000" />
-      <workItem from="1734952786406" duration="4114000" />
+      <workItem from="1734952786406" duration="5168000" />
     </task>
+    <task id="LOCAL-00001" summary="重构了测试文件并加入.idea文件夹">
+      <option name="closed" value="true" />
+      <created>1734959154651</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1734959154651</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -249,6 +258,10 @@
     <isAutomaticCheckingOnLaunch value="false" />
     <isAutomaticFoundErrors value="true" />
     <isAutomaticReloadCMake value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="重构了测试文件并加入.idea文件夹" />
+    <option name="LAST_COMMIT_MESSAGE" value="重构了测试文件并加入.idea文件夹" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
