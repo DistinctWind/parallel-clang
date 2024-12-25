@@ -1,6 +1,0 @@
-{
-    "cmake.configureSettings": {
-        "LLVM_DIR": "/home/gorun/.local/llvm-git/lib/cmake/llvm",
-        "Clang_DIR": "/home/gorun/.local/llvm-git/lib/cmake/clang"
-    }
-}
